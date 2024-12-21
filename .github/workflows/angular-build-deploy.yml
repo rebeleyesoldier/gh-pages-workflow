@@ -26,15 +26,23 @@ jobs:
       
       - name: Debug directory
         run: |
+          echo "Current directory:"
           pwd
-          ls -la
-          ls -la dist || true
-          ls -la dist/gh-pages-workflow/browser || true
+          echo "Directory contents:"
+          ls -R dist
+          
+      - name: Ensure directory exists
+        run: |
+          if [ ! -d "dist/gh-pages-workflow/browser" ]; then
+            echo "Build directory not found!"
+            exit 1
+          fi
       
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ github.workspace }}/dist/gh-pages-workflow/browser
+          name: github-pages
+          path: dist/gh-pages-workflow/browser
 
   deploy:
     environment:
@@ -47,6 +55,6 @@ jobs:
       id-token: write
     
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy GitHub Pages site
         id: deployment
         uses: actions/deploy-pages@v3
