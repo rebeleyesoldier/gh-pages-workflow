@@ -24,37 +24,34 @@ jobs:
       - name: Build Angular app
         run: npm run build -- --base-href /gh-pages-workflow/
       
-      - name: Debug directory
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -R dist
-          
-      - name: Ensure directory exists
-        run: |
-          if [ ! -d "dist/gh-pages-workflow/browser" ]; then
-            echo "Build directory not found!"
-            exit 1
-          fi
-      
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: github-pages
+          name: dist
           path: dist/gh-pages-workflow/browser
 
   deploy:
-    environment:
-      name: github-pages
-      url: ${{steps.deployment.outputs.page_url}}
-    runs-on: ubuntu-22.04
     needs: build
+    runs-on: ubuntu-22.04
     permissions:
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-      - name: Deploy GitHub Pages site
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: ./dist
+          
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+          
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
