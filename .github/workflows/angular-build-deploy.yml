@@ -1,4 +1,5 @@
 name: CI
+
 on:
   push:
     branches: [ "master" ]
@@ -27,8 +28,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: dist/gh-pages-workflow/browser
+          name: gh-pages-artifact
+          path: dist/gh-pages-workflow
 
   deploy:
     needs: build
@@ -36,22 +37,17 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: dist
-          path: ./dist
-          
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
+          name: gh-pages-artifact
           path: ./dist
           
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v3
+        with:
+          path: ./dist/gh-pages-workflow
